@@ -1,7 +1,7 @@
 <Project>
     <PropertyGroup>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-        <KozLibrariesVersion>0.22.0</KozLibrariesVersion>
+        <KozLibrariesVersion>0.25.0</KozLibrariesVersion>
     </PropertyGroup>
     <ItemGroup>
         <PackageVersion
@@ -10,6 +10,7 @@
         />
         <PackageVersion Include="KozLibraries.JsonMessages" Version="$(KozLibrariesVersion)" />
         <PackageVersion Include="KozLibraries.DapperDateOnlySupport" Version="$(KozLibrariesVersion)" />
+        <PackageVersion Include="KozLibraries.DapperSqlHelper" Version="$(KozLibrariesVersion)" />
 
         <PackageVersion Include="Scalar.AspNetCore" Version="2.14.14" />
         <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />

@@ -3,12 +3,16 @@ using System.Globalization;
 using System.Threading.Tasks;
 using AutoRegisterAnnotation;
 using FluentValidation;
+using KozLibraries.DapperSqlHelper;
 using MicroElements.AspNetCore.OpenApi.FluentValidation;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
 using Serilog;
+using WatchStore.Api.Settings;
 
 // Bootstrap Logger
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
@@ -41,13 +45,22 @@ try
         opts.ValidateOnBuild = true;
     });
 
-    // Add services to the container.
+    // Get Database settings
+    var databaseSetting =
+        builder.Configuration.GetRequiredSection("Database").Get<DatabaseSetting>()
+        ?? throw new InvalidOperationException("Database settings are required");
 
+    // Add services to the container.
     builder.Services.AddControllers();
     builder.Services.AddProblemDetails();
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
     builder.Services.AddFluentValidationRulesToOpenApi();
     builder.Services.AddAutoRegisterServices<Program>();
+    builder.Services.AddNpgsqlDataSource(databaseSetting.ConnectionString);
+    builder.Services.AddSqlResource(opts =>
+    {
+        opts.SqlBasePath = "Sql";
+    });
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi(opts =>

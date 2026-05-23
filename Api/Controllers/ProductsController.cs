@@ -3,26 +3,64 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WatchStore.Api.Extensions;
+using WatchStore.Api.Mappers;
 using WatchStore.Api.Models.Domain;
 using WatchStore.Api.Models.Dto;
-using WatchStore.Api.Services;
+using WatchStore.Api.Repositories;
 
 namespace WatchStore.Api.Controllers;
 
 [ApiController]
 [Route("api/products")]
-public sealed class ProductsController(ProductStorageService productStorage) : ControllerBase
+public sealed class ProductsController(ProductsRepository repo) : ControllerBase
 {
+    /// <summary>
+    /// Get All Products
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> GetProductsAsync(CancellationToken ct)
+    [ProducesResponseType(typeof(IEnumerable<Product>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<Product>>> GetProducts(CancellationToken ct)
     {
-        var products = await productStorage.ReadProductsAsync(ct);
+        var rows = await repo.SelectAllAsync(ct);
+        var products = rows.Select(r => r.ToModel());
         return Ok(products);
     }
 
+    /// <summary>
+    /// Get Product by Id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    [HttpGet("id:int")]
+    [ProducesResponseType<Product>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<Product>> GetProductById(int id, CancellationToken ct)
+    {
+        var row = await repo.SelectByIdAsync(id, ct);
+        if (row is null)
+        {
+            return Problem(title: $"Product of {id} is not found.", statusCode: StatusCodes.Status404NotFound);
+        }
+
+        return Ok(row.ToModel());
+    }
+
+    /// <summary>
+    /// Create new Product
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <param name="validator"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     [HttpPost]
+    [ProducesResponseType<Product>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreatePost(
         [FromBody] NewProductDto dto,
         [FromServices] IValidator<NewProductDto> validator,
@@ -35,20 +73,8 @@ public sealed class ProductsController(ProductStorageService productStorage) : C
             return ValidationProblem(result.IntoProblemDetails());
         }
 
-        //
-        var products = await productStorage.ReadProductsAsync(ct);
-        var maxId = products.Select(p => p.Id).MaxOrElse(0);
-        products.Add(
-            new Product
-            {
-                Id = maxId + 1,
-                Name = dto.Name!,
-                Description = dto.Description,
-                Price = dto.Price!.Value,
-            }
-        );
+        var row = await repo.InsertAsync(dto, ct);
 
-        await productStorage.SaveProductsAsync(products, ct);
-        return Created();
+        return CreatedAtAction(nameof(GetProductById), new { id = row.Id }, row.ToModel());
     }
 }

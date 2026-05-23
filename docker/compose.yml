@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:18-trixie
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${DATABASE__USER}
+      POSTGRES_PASSWORD: ${DATABASE__PASSWORD}
+      POSTGRES_DB: ${DATABASE__NAME}
+    restart: always
+    volumes:
+      - type: volume
+        source: watch_store_db_data
+        target: /var/lib/postgresql
+        volume:
+          nocopy: true
+    ports:
+      - "5432:5432"
+  ui:
+    image: dpage/pgadmin4:9
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      # servers.json で使用する環境変数をpgAdminコンテナに渡す
+      DATABASE__NAME: ${DATABASE__NAME}
+      DATABASE__USER: ${DATABASE__USER}
+      # pgAdmin に servers.json の場所を教える
+      PGADMIN_SERVER_JSON_FILE: /var/lib/pgadmin/servers/servers.json
+    ports:
+      - "8080:80"
+    volumes:
+      - watch_store_pgadmin_data:/var/lib/pgadmin
+      - ./config/servers.json.template:/pgadmin4/servers.json.template
+      - ./pgadmin_entrypoint.sh:/pgadmin_entrypoint.sh
+    entrypoint: [ "/bin/bash", "/pgadmin_entrypoint.sh" ]
+    depends_on:
+      - db
+volumes:
+  watch_store_db_data:
+  watch_store_pgadmin_data:

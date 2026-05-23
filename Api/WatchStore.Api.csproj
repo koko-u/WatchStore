@@ -3,6 +3,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>disable</ImplicitUsings>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     </PropertyGroup>
 
     <ItemGroup>
@@ -10,6 +11,7 @@
         <PackageReference Include="FluentValidation" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
         <PackageReference Include="KozLibraries.AutoRegisterAnnotation" />
+        <PackageReference Include="KozLibraries.DapperSqlHelper" />
         <PackageReference Include="Scalar.AspNetCore" />
         <PackageReference Include="MicroElements.AspNetCore.OpenApi.FluentValidation" />
         <PackageReference Include="Serilog" />
@@ -19,15 +21,18 @@
         <PackageReference Include="Serilog.Settings.Configuration" />
         <PackageReference Include="Serilog.Enrichers.ShortTypeName" />
         <PackageReference Include="Dapper" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Models\Rows\" />
+        <PackageReference Include="Npgsql" />
+        <PackageReference Include="Npgsql.DependencyInjection" />
+        <PackageReference Include="Riok.Mapperly" PrivateAssets="all" ExcludeAssets="runtime" />
     </ItemGroup>
 
     <ItemGroup>
         <None Include="Data\products.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Services\" />
     </ItemGroup>
 </Project>
