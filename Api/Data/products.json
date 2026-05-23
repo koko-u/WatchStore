@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "name": "Chronos Classic Silver",
+        "description": "シルバーステンレス製のクラシックなアナログ腕時計。日常使い向け。",
+        "price": 19800.00
+    },
+    {
+        "id": 2,
+        "name": "Luna Black Chronograph",
+        "description": "ブラック文字盤とクロノグラフ機能を備えたスポーツウォッチ。",
+        "price": 34800.00
+    },
+    {
+        "id": 3,
+        "name": "Ocean Diver 300M",
+        "description": "300m防水対応のダイバーズウォッチ。夜光インデックス搭載。",
+        "price": 72800.00
+    },
+    {
+        "id": 4,
+        "name": "Aurora Rose Gold",
+        "description": "ローズゴールドカラーのケースを採用した上品なレディースモデル。",
+        "price": 26400.00
+    },
+    {
+        "id": 5,
+        "name": "Vertex Smart Time",
+        "description": "心拍数計測や通知機能を搭載したスマートウォッチ。",
+        "price": 41800.00
+    }
+]
