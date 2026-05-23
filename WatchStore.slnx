@@ -1,0 +1,5 @@
+<Solution>
+    <Folder Name="/Api/">
+        <Project Path="Api/WatchStore.Api.csproj" />
+    </Folder>
+</Solution>
