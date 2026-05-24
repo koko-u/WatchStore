@@ -177,6 +177,28 @@ public sealed class ProductsTests(ApiFactory factory) : IAsyncLifetime
         }
     }
 
+    [Fact]
+    public async Task Delete_Product_ReturnNoContent()
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(CancellationToken);
+        await using var tx = await conn.BeginTransactionAsync(CancellationToken);
+        var cmd = new CommandDefinition(
+            commandText: """
+            INSERT INTO "products" ("name", "description", "price")
+            VALUES ('One', 'Product one', 100),
+                   ('Two', 'Product two', 200)
+            RETURNING "id";
+            """,
+            transaction: tx,
+            cancellationToken: CancellationToken
+        );
+        var ids = (await conn.QueryAsync<int>(cmd)).ToList();
+        await tx.CommitAsync(CancellationToken);
+
+        var response = await _client.DeleteAsync($"/api/products/{ids[0]}", CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent, "Status Code = {0}", response.StatusCode);
+    }
+
     public async ValueTask InitializeAsync() => await ResetDatabaseAsync();
 
     public async ValueTask DisposeAsync() => await ResetDatabaseAsync();
