@@ -135,4 +135,31 @@ public sealed class ProductsRepository(NpgsqlDataSource dataSource, SqlResource 
             throw;
         }
     }
+
+    public async Task<ProductRow?> DeleteByIdAsync(int id, CancellationToken ct)
+    {
+        var deleteSql = await sql.GetAsync("Products/delete_by_id.sql", ct);
+        await using var conn = await dataSource.OpenConnectionAsync(ct);
+        await using var tx = await conn.BeginTransactionAsync(ct);
+        try
+        {
+            var deleteCmd = new CommandDefinition(
+                commandText: deleteSql,
+                parameters: new { Id = id },
+                transaction: tx,
+                cancellationToken: ct
+            );
+            var row = await conn.QuerySingleOrDefaultAsync<ProductRow>(deleteCmd);
+
+            await tx.CommitAsync(ct);
+
+            return row;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to delete product with id '{id}'", id);
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+    }
 }

@@ -1,0 +1,4 @@
+DELETE
+FROM "products"
+WHERE "id" = @Id
+RETURNING "id", "name", "description", "price";

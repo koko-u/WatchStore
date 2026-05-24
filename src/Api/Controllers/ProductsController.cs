@@ -111,4 +111,24 @@ public sealed class ProductsController(ProductsRepository repo) : ControllerBase
 
         return Ok(row.ToModel());
     }
+
+    /// <summary>
+    /// Delete Product by Id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    [HttpDelete("{id:int:min(1)}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteById(int id, CancellationToken ct)
+    {
+        var row = await repo.DeleteByIdAsync(id, ct);
+        if (row is null)
+        {
+            return Problem(title: $"Product with id {id} not found", statusCode: StatusCodes.Status404NotFound);
+        }
+
+        return NoContent();
+    }
 }
