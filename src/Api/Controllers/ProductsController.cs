@@ -37,7 +37,7 @@ public sealed class ProductsController(ProductsRepository repo) : ControllerBase
     /// <param name="id"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int:min(1)}")]
     [ProducesResponseType<Product>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Product>> GetProductById(int id, CancellationToken ct)
@@ -61,7 +61,7 @@ public sealed class ProductsController(ProductsRepository repo) : ControllerBase
     [HttpPost]
     [ProducesResponseType<Product>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult> CreatePost(
+    public async Task<ActionResult> CreateProduct(
         [FromBody] NewProductDto dto,
         [FromServices] IValidator<NewProductDto> validator,
         CancellationToken ct
@@ -76,5 +76,39 @@ public sealed class ProductsController(ProductsRepository repo) : ControllerBase
         var row = await repo.InsertAsync(dto, ct);
 
         return CreatedAtAction(nameof(GetProductById), new { id = row.Id }, row.ToModel());
+    }
+
+    /// <summary>
+    /// Update Product
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="dto"></param>
+    /// <param name="validator"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    [HttpPatch("{id:int:min(1)}")]
+    [ProducesResponseType<Product>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> PatchProductById(
+        int id,
+        [FromBody] PatchProductDto dto,
+        [FromServices] IValidator<PatchProductDto> validator,
+        CancellationToken ct
+    )
+    {
+        var result = await validator.ValidateAsync(dto, ct);
+        if (!result.IsValid)
+        {
+            return ValidationProblem(result.IntoProblemDetails());
+        }
+
+        var row = await repo.UpdateAsync(id, dto, ct);
+        if (row is null)
+        {
+            return Problem(title: $"Product with id {id} not found", statusCode: StatusCodes.Status404NotFound);
+        }
+
+        return Ok(row.ToModel());
     }
 }

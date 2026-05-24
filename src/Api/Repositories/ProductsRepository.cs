@@ -7,6 +7,7 @@ using Dapper;
 using KozLibraries.DapperSqlHelper;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using WatchStore.Api.Extensions;
 using WatchStore.Api.Models.Dto;
 using WatchStore.Api.Models.Rows;
 
@@ -83,6 +84,53 @@ public sealed class ProductsRepository(NpgsqlDataSource dataSource, SqlResource 
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to insert product with name '{Name}'", dto.Name);
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Partial update of a product by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="dto"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task<ProductRow?> UpdateAsync(int id, PatchProductDto dto, CancellationToken ct)
+    {
+        var patchSql = await sql.GetAsync("Products/patch_template.sql", ct);
+        var builder = new SqlBuilder();
+        var template = builder.AddTemplate(patchSql);
+        builder.AddParameters(new { Id = id });
+        var set = false;
+        set = set || builder.SetIfSpecified("name = @Name", () => dto.Name);
+        set = set || builder.SetIfSpecified("description = @Description", () => dto.Description);
+        set = set || builder.SetIfSpecified("price = @Price", () => dto.Price);
+        if (!set)
+        {
+            throw new InvalidOperationException("No fields specified for update");
+        }
+
+        await using var conn = await dataSource.OpenConnectionAsync(ct);
+        await using var tx = await conn.BeginTransactionAsync(ct);
+        try
+        {
+            var patchCmd = new CommandDefinition(
+                commandText: template.RawSql,
+                parameters: template.Parameters,
+                transaction: tx,
+                cancellationToken: ct
+            );
+            var row = await conn.QuerySingleOrDefaultAsync<ProductRow>(patchCmd);
+
+            await tx.CommitAsync(ct);
+
+            return row;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update product with id '{id}'", id);
             await tx.RollbackAsync(ct);
             throw;
         }

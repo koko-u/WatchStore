@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
 using Serilog;
+using WatchStore.Api.OpenApiTransformers;
 using WatchStore.Api.Settings;
 
 // Bootstrap Logger
@@ -73,6 +74,8 @@ try
                 return Task.CompletedTask;
             }
         );
+        opts.AddSchemaTransformer<PatchFieldSchemaTransformer>();
+        opts.AddSchemaTransformer<PatchProductDtoSchemaTransformer>();
 
         opts.AddFluentValidationRules();
     });
