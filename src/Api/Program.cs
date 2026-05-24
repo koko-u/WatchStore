@@ -6,7 +6,7 @@ using FluentValidation;
 using KozLibraries.DapperSqlHelper;
 using MicroElements.AspNetCore.OpenApi.FluentValidation;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,7 +38,7 @@ try
         }
     );
 
-    // Configure DI Valication
+    // Configure DI Validation
     builder.Host.UseDefaultServiceProvider(opts =>
     {
         opts.ValidateScopes = true;
@@ -80,7 +80,7 @@ try
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
+    if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Test"))
     {
         app.MapOpenApi();
         app.MapScalarApiReference(opts =>
@@ -108,12 +108,14 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+    app.MapGet("/health", () => Results.Ok(new { Status = "Health Check Ok" }));
 
     app.Run();
 }
 catch (Exception ex)
 {
     Log.Fatal(ex, "Application terminated unexpectedly");
+    throw;
 }
 finally
 {

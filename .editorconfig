@@ -9,7 +9,10 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 max_line_length = 120
 
+[*.{yaml,yml}]
+indent_size = 2
 
+[*.cs]
 dotnet_code_quality_unused_parameters = all
 dotnet_style_coalesce_expression = false
 dotnet_style_prefer_inferred_anonymous_type_member_names = true
@@ -66,7 +69,7 @@ csharp_style_unused_value_assignment_preference = discard_variable
 csharp_style_pattern_matching_over_as_with_null_check = true
 csharp_space_after_colon_in_inheritance_clause = true
 csharp_style_deconstructed_variable_declaration = true
-csharp_style_expression_bodied_accessors = false
+csharp_style_expression_bodied_accessors = true
 csharp_style_prefer_pattern_matching = true
 csharp_style_prefer_utf8_string_literals = true
 csharp_new_line_before_members_in_object_initializers = true
@@ -108,7 +111,7 @@ csharp_space_between_method_call_parameter_list_parentheses = false
 csharp_preserve_single_line_blocks = true
 csharp_space_before_comma = false
 csharp_indent_labels = one_less_than_current
-csharp_style_expression_bodied_methods = false
+csharp_style_expression_bodied_methods = true
 csharp_preferred_modifier_order = public, private, protected, internal, file, static, extern, new, virtual, abstract, sealed, override, readonly, unsafe, required, volatile, async
 csharp_space_between_empty_square_brackets = false
 csharp_style_var_when_type_is_apparent = true
@@ -119,9 +122,9 @@ csharp_space_before_semicolon_in_for_statement = false
 csharp_space_around_declaration_statements = false
 csharp_new_line_before_open_brace = all
 csharp_space_between_method_declaration_parameter_list_parentheses = false
-csharp_style_expression_bodied_properties = false
+csharp_style_expression_bodied_properties = true
 csharp_prefer_simple_using_statement = true
-csharp_style_expression_bodied_local_functions = false
+csharp_style_expression_bodied_local_functions = true
 resharper_space_around_ternary_operator = true
 resharper_space_around_member_access_operator = false
 resharper_space_after_unary_operator = false

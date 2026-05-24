@@ -27,12 +27,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="Data\products.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
+        <Folder Include="Services\" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Services\" />
+        <None Include="appsettings.Test.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 </Project>

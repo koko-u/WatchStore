@@ -1,5 +1,7 @@
 services:
   db:
+    profiles:
+      - dev
     image: postgres:18-trixie
     container_name: postgres
     environment:
@@ -16,6 +18,8 @@ services:
     ports:
       - "5432:5432"
   ui:
+    profiles:
+      - dev
     image: dpage/pgadmin4:9
     container_name: pgadmin
     environment:
@@ -37,6 +41,20 @@ services:
     entrypoint: [ "/bin/bash", "/pgadmin_entrypoint.sh" ]
     depends_on:
       - db
+  test_db:
+    profiles:
+      - test
+    image: postgres:18-trixie
+    container_name: test_pg
+    environment:
+      POSTGRES_USER: ${DATABASE_TEST_USER}
+      POSTGRES_PASSWORD: ${DATABASE_TEST_PASSWORD}
+      POSTGRES_DB: ${DATABASE_TEST_NAME}
+    restart: always
+    tmpfs:
+      - /var/lib/postgresql
+    ports:
+      - "${DATABASE_TEST_PORT}:5432"
 volumes:
   watch_store_db_data:
   watch_store_pgadmin_data:
