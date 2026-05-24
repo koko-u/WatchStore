@@ -103,11 +103,11 @@ public sealed class ProductsRepository(NpgsqlDataSource dataSource, SqlResource 
         var builder = new SqlBuilder();
         var template = builder.AddTemplate(patchSql);
         builder.AddParameters(new { Id = id });
-        var set = false;
-        set = set || builder.SetIfSpecified("name = @Name", () => dto.Name);
-        set = set || builder.SetIfSpecified("description = @Description", () => dto.Description);
-        set = set || builder.SetIfSpecified("price = @Price", () => dto.Price);
-        if (!set)
+
+        var setName = builder.SetIfSpecified("name = @Name", () => dto.Name);
+        var setDesc = builder.SetIfSpecified("description = @Description", () => dto.Description);
+        var setPrice = builder.SetIfSpecified("price = @Price", () => dto.Price);
+        if (!setName && !setDesc && !setPrice)
         {
             throw new InvalidOperationException("No fields specified for update");
         }

@@ -23,27 +23,39 @@ public sealed class PatchProductDtoJsonConverter : JsonConverter<PatchProductDto
         {
             dto.Name = nameElement.ValueKind switch
             {
-                JsonValueKind.Null => PatchField<string?>.Unspecified,
+                JsonValueKind.Null => PatchField<string?>.Specified(null),
                 _ => PatchField<string?>.Specified(nameElement.GetString()!),
             };
+        }
+        else
+        {
+            dto.Name = PatchField<string?>.Unspecified;
         }
 
         if (root.TryGetProperty("description", out var descriptionElement))
         {
             dto.Description = descriptionElement.ValueKind switch
             {
-                JsonValueKind.Null => PatchField<string?>.Unspecified,
+                JsonValueKind.Null => PatchField<string?>.Specified(null),
                 _ => PatchField<string?>.Specified(descriptionElement.GetString()),
             };
+        }
+        else
+        {
+            dto.Description = PatchField<string?>.Unspecified;
         }
 
         if (root.TryGetProperty("price", out var priceElement))
         {
             dto.Price = priceElement.ValueKind switch
             {
-                JsonValueKind.Null => PatchField<decimal?>.Unspecified,
+                JsonValueKind.Null => PatchField<decimal?>.Specified(null),
                 _ => PatchField<decimal?>.Specified(priceElement.GetDecimal()),
             };
+        }
+        else
+        {
+            dto.Price = PatchField<decimal?>.Unspecified;
         }
 
         return dto;

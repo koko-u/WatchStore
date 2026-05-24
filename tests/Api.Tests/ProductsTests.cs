@@ -124,6 +124,59 @@ public sealed class ProductsTests(ApiFactory factory) : IAsyncLifetime
         }
     }
 
+    [Fact]
+    public async Task Patch_Product_ReturnOk()
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(CancellationToken);
+        await using var tx = await conn.BeginTransactionAsync(CancellationToken);
+        var cmd = new CommandDefinition(
+            commandText: """
+            INSERT INTO "products" ("name", "description", "price")
+            VALUES ('One', 'Product one', 100),
+                   ('Two', 'Product two', 200)
+            RETURNING "id";
+            """,
+            transaction: tx,
+            cancellationToken: CancellationToken
+        );
+        var ids = (await conn.QueryAsync<int>(cmd)).ToList();
+        await tx.CommitAsync(CancellationToken);
+
+        // name is unchanged
+        // description is set null
+        // price is set to 500
+        var dto = new PatchProductDto
+        {
+            Name = PatchField<string?>.Unspecified,
+            Description = PatchField<string?>.Specified(null),
+            Price = PatchField<decimal?>.Specified(500),
+        };
+        var response = await _client.PatchAsJsonAsync($"/api/products/{ids[0]}", dto, CancellationToken);
+        await using var body = await response.Content.ReadAsStreamAsync(CancellationToken);
+        var product = await JsonSerializer.DeserializeAsync<Product>(
+            body,
+            JsonSerializerOptions.Web,
+            CancellationToken
+        );
+
+        using (new AssertionScope())
+        {
+            response.IsSuccessStatusCode.Should().BeTrue("Status Code = {0}", response.StatusCode);
+            product.Should().NotBeNull();
+            product
+                .Should()
+                .BeEquivalentTo(
+                    new Product
+                    {
+                        Id = ids[0],
+                        Name = "One",
+                        Description = null,
+                        Price = 500,
+                    }
+                );
+        }
+    }
+
     public async ValueTask InitializeAsync() => await ResetDatabaseAsync();
 
     public async ValueTask DisposeAsync() => await ResetDatabaseAsync();
