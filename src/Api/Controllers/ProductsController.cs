@@ -37,7 +37,7 @@ public sealed class ProductsController(ProductsRepository repo) : ControllerBase
     /// <param name="id"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    [HttpGet("id:int")]
+    [HttpGet("{id:int}")]
     [ProducesResponseType<Product>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Product>> GetProductById(int id, CancellationToken ct)
